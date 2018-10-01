@@ -5,6 +5,8 @@ const wallet = EthHdWallet.fromMnemonic(mnemonic);
 const Web3 = require('web3');
 const provider = new Web3.providers.HttpProvider('https://mainnet.infura.io/2c27dbaf422a4e25ad7dd35e4a197440');
 const web3 = new Web3(provider);
+const rp = require('request-promise');
+const underscore = require('underscore');
 
 exports.createAddress = (addressCount) => {
   return new Promise((resolve, reject) => {
@@ -60,6 +62,26 @@ exports.doTX = (fromAddress, toAddress, message) => {
       resolve(isDone);
     } catch (e) {
       console.error('[doTX Service Error]', e);
+      reject(e);
+    }
+  });
+};
+
+exports.getTXs = (address) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const options = {
+        uri: `http://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=QASQCBV73CN8ZCVKPHBYS3AQIPZCMFDZE9`,
+        json: true // Automatically parses the JSON string in the response
+      };
+      const res = await rp.get(options);
+      const result = res.result.map((obj) => {
+        obj.input = web3.utils.toAscii(obj.input);
+        return { txid: obj.hash, confirmations: parseInt(obj.confirmations), fromAddress: obj.from, toAddress: obj.to, message: obj.input };
+      })
+      resolve(underscore.sortBy(result, 'confirmations'));
+    } catch (e) {
+      console.error('[getTXs Service Error]', e);
       reject(e);
     }
   });
