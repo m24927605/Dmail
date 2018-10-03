@@ -3,6 +3,7 @@
 // alternative to load event
 document.onreadystatechange = function () {
   if (document.readyState == "complete") {
+    // let result = await getAddresss();
     // init default Setup
     initFunction();
     // bind upload
@@ -12,7 +13,7 @@ document.onreadystatechange = function () {
   }
 }
 
-const initFunction = () => {
+const initFunction = async () => {
   let form_sender = document.querySelector("#form_sender");
   let form_receiver = document.querySelector('#form_receiver');
 
@@ -24,6 +25,8 @@ const initFunction = () => {
     var activeTab = $(e.target).text();
     changeTab(activeTab);
   });
+
+  await getAddresss();
 
 };
 
@@ -212,6 +215,17 @@ function upload() {
         console.log("https://ipfs.io/ipfs/" + directoryHash);
 
         let directoryHTML = "https://ipfs.io/ipfs/" + directoryHash;
+
+        //{ "fromAddress":"0x3407e8c5e9e47a166631393d6711aa580cf17d3b","toAddress":"0x6dee7ac37ba930f97fa66e57e4b4788bd2f52524","message":"https://ipfs.io/ipfs/QmQxz5RJkjsECBNzpGG8TZZc75oTPxqvJk2CerxjhneWYZ"}
+       
+        // let result = {"fromAddress":$('#form_sender').value , 
+        // "toAddress":$('#form_receiver').value ,
+        // "message" : directoryHTML};
+
+        // console.log(`result = ${JSON.stringify(result)}`);
+
+
+
         swal({
           html: '發送完成' + '<br/><a target="_blank" href=' + directoryHTML + '>請點我</a>',
           type: 'success',
@@ -244,6 +258,20 @@ const readFiles = async (ipfs, directory, curFiles) => {
     // 
   }
   let files = await Promise.all(promiseArray);
+
+
+  var doc = new jsPDF('', 'pt', 'a4');
+  await html2canvas(document.body, {
+    onrendered: function (canvas) {
+      var image = canvas.toDataURL("image/png");
+      doc.addImage(image, 'JPEG', 0, 0, canvas.width, canvas.height);
+      files.push({
+        path: `${directory}/test123.pdf`,
+        content: ipfs.types.Buffer.from(btoa(doc.output()), "base64")
+      })
+    }
+  });
+
   console.timeEnd('read file');
   return files;
 
@@ -291,10 +319,25 @@ const streamFiles = (ipfs, directory, files, cb) => {
   console.log(files);
   const stream = ipfs.files.addReadableStream();
   console.time('stream file');
-  stream.on('data', function (data) {
+  stream.on('data', async function (data) {
     console.log(`Added ${data.path} hash: ${data.hash}`)
     // The last data event will contain the directory hash
     if (data.path === directory) {
+
+      let fromAddress = document.querySelector("#form_sender").value;
+      let toAddress = document.querySelector('#form_receiver').value;
+
+      // let data1 = {
+      //   fromAddress, 
+      //          toAddress ,
+      //   "message":  "https://ipfs.io/ipfs/"
+      // };
+
+      let result = await doTx({
+        fromAddress,
+        toAddress,
+        "message":  "https://ipfs.io/ipfs/"+data.hash
+      });
       cb(null, data.hash)
     }
   })
@@ -357,7 +400,7 @@ const initReceiveFunction = async () => {
   for (var i = 0; i < address_array.length; i++) {
     var option = '<option value="' + i + '">' + address_array[i] + '</option>';
     options.push(option);
-  
+
   }
 
   _options = options.join('');
@@ -405,8 +448,8 @@ const getAddresss = async () => {
 
 const getTx = async (address) => {
   console.log(`getTx = ${address}`);
-  console.log("getTx url "+"http://localhost:3000/txs?address="+address);
-  let response = await fetch("http://localhost:3000/txs?address="+address, {
+  console.log("getTx url " + "http://localhost:3000/txs?address=" + address);
+  let response = await fetch("http://localhost:3000/txs?address=" + address, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
@@ -428,8 +471,39 @@ const getTx = async (address) => {
     let err = await fallingResult.json();
     throw err;
   }
-
 }
 
+//{ "fromAddress":"0x3407e8c5e9e47a166631393d6711aa580cf17d3b","toAddress":"0x6dee7ac37ba930f97fa66e57e4b4788bd2f52524","message":"https://ipfs.io/ipfs/QmQxz5RJkjsECBNzpGG8TZZc75oTPxqvJk2CerxjhneWYZ"}
+const doTx = async (data) => {
+  let { fromAddress, toAddress, message } = data;
+  console.log(`doTx data = ${JSON.stringify(data)}`);
+  console.log(`fromAddress = ${fromAddress}`);
+  console.log(`toAddress = ${toAddress}`);
+  console.log(`message = ${message}`);
+  let response = await fetch("http://localhost:3000/doTX", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  let fallingResult = null, finalResult = null;
+  if (response.status == 200 || response.status == 201) {
+    finalResult = response;
+  } else {
+    fallingResult = response;
+  }
+  console.log(`doTx finalResult  = ${finalResult}`);
+  if (finalResult !== null) {
+    let data = await finalResult.json();
+    console.log(`doTx data  = ${JSON.stringify(data)}`);
+
+    return data;
+  } else {
+    let err = await fallingResult.json();
+    throw err;
+  }
+}
 
 
