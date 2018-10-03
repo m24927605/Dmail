@@ -1,14 +1,42 @@
+
+
 // alternative to load event
 document.onreadystatechange = function () {
   if (document.readyState == "complete") {
     // init default Setup
     initFunction();
-    // bind Radios
-    bindRadios();
+    // bind upload
+    bindUpload();
     // bind Submit
     bindSubmit();
   }
 }
+
+const initFunction = () => {
+  let form_sender = document.querySelector("#form_sender");
+  let form_receiver = document.querySelector('#form_receiver');
+
+  form_sender.placeholder = "Please enter Sender Email*";
+  form_receiver.placeholder = "Please enter Receiver Email*";
+
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    // 获取已激活的标签页的名称
+    var activeTab = $(e.target).text();
+    changeTab(activeTab);
+  });
+
+};
+
+const changeTab = (tab) => {
+  if (tab === "Send Mail") {
+    console.log(`activeTab1 = ${tab}`);
+  } else {
+    console.log(`activeTab2 = ${tab}`);
+    initReceiveFunction();
+  }
+}
+
+
 /**
  * bindSubmit
  * @description setup submit callback
@@ -30,53 +58,16 @@ const bindSubmit = () => {
       }
     });
     console.log('submit');
-    let targetForm  = event.target;
+    let targetForm = event.target;
     let result = formSerialize(targetForm);
     console.log(result);
     upload();
   };
 };
 
-const initFunction = () => {
-  // let mailFormat = document.querySelectorAll("[name='mailFormat']");
-    let initNumber = document.querySelector("[name='feeAmount']");
-    initNumber.disabled=true;
-    let feeAmountField = document.querySelector("[name='feeAmountField']");
-    feeAmountField.style= "display:none;";
-    // initNumber.style= "display:none;";
-    let labels = document.getElementsByTagName('label');
-    for (let i = 0 ; i < labels.length; i++) {
-      console.log(labels[i].innerText);
-      labels[i].classList.remove('color_white');
-    }
-    let body = document.body;
-    body.classList.remove('background_black');
-    let head_title = document.querySelector('[name=head_title]');
-    head_title.classList.remove('color_white');
-};
-
-const bindRadios = () => {
-  // get radios
-  let mailFormat = document.querySelectorAll("[name='mailFormat']");
-  // change the current setup by click radio
-  mailFormat.forEach(radio=> {
-    radio.addEventListener('click', (e) => {
-      let currentValue = document.querySelector("[name='mailFormat']:checked");
-      let emailFormat = currentValue.value;
-      // setup input by emailFormat
-      setupInputByFormat(emailFormat);
-      // change labels by emailFormat
-      changeLabelsByFormat(emailFormat);
-      // set up bg by emailFormat
-      setupBgByFormat(emailFormat);
-    });
-  });
-  bindUpload();
-};
-
 const changeLabelsByFormat = (emailFormat) => {
   let labels = document.getElementsByTagName('label');
-  for (let i = 0 ; i < labels.length; i++) {
+  for (let i = 0; i < labels.length; i++) {
     if (emailFormat == "normal") {
       labels[i].classList.remove('color_white');
     }
@@ -91,30 +82,30 @@ const setupInputByFormat = (emailFormat) => {
   let form_receiver = document.querySelector('#form_receiver');
   let feeAmount = document.querySelector("[name='feeAmount']");
   let feeAmountField = document.querySelector("[name='feeAmountField']");
-   
-  form_sender.placeholder = emailFormat == "normal"?"Please enter Sender Email*":"Please enter Sender Address";
-  form_receiver.placeholder = emailFormat == "normal"?"Please enter Receiver Email*":"Please enter Receiver Address";
+
+  form_sender.placeholder = emailFormat == "normal" ? "Please enter Sender Email*" : "Please enter Sender Address";
+  form_receiver.placeholder = emailFormat == "normal" ? "Please enter Receiver Email*" : "Please enter Receiver Address";
   feeAmount.disabled = (emailFormat == "normal");
-  feeAmountField.style= (emailFormat == "normal")?"display:none;":"";
+  feeAmountField.style = (emailFormat == "normal") ? "display:none;" : "";
 };
 
 const setupBgByFormat = (emailFormat) => {
   let head_titleInner = document.querySelector('[name=head_title]');
   let bodyInner = document.body;
-  if (emailFormat=="normal") {
+  if (emailFormat == "normal") {
     bodyInner.classList.remove('background_black');
     head_titleInner.classList.remove('color_white');
   } else {
     bodyInner.classList.add('background_black');
     head_titleInner.classList.add('color_white');
   }
-  head_titleInner.innerHTML = emailFormat=="normal"?"Normal Email":"Zen Email";
+  head_titleInner.innerHTML = emailFormat == "normal" ? "Normal Email" : "Zen Email";
 };
 
 const bindUpload = () => {
   let form_file = document.querySelector('#form_file');
   let files_list = document.querySelector('.files_list');
-  form_file.addEventListener('change', (e)=> {
+  form_file.addEventListener('change', (e) => {
     console.log('changes');
     // console.log(other);
     form_file.classList.remove('zIndex_Minus');
@@ -122,11 +113,11 @@ const bindUpload = () => {
       return;
     }
     // console.log('tempfiles',e.key);
-    files_list.innerHTML ="";
+    files_list.innerHTML = "";
     let files = e.target.files;
     let filesArr = Array.prototype.slice.call(files);
     if (filesArr.length == 0) {
-      files_list.innerHTML ="please attach files";
+      files_list.innerHTML = "please attach files";
     }
     // let reader = new FileReader();
     // reader.onload = function(re) {
@@ -139,11 +130,11 @@ const bindUpload = () => {
     // else {
     //   form_file.classList.remove('zIndex_Minus');
     // }
-    filesArr.forEach((f, index)=>{
+    filesArr.forEach((f, index) => {
       let file = files[index];
       let reader = new FileReader();
-      reader.onload = function(re) {
-        let size = Number(file.size/(1024*1024)).toFixed(5);
+      reader.onload = function (re) {
+        let size = Number(file.size / (1024 * 1024)).toFixed(5);
         let html = `<div id="file${index}">${file.name} - ${size} kB</div>`;
         files_list.innerHTML += html;
       };
@@ -176,14 +167,14 @@ const bindUpload = () => {
  * 
  * @param {object} form 
  */
-const formSerialize = (form)=> {
-  if (!form||!form.elements) {
+const formSerialize = (form) => {
+  if (!form || !form.elements) {
     return null;
   }
   let elements = form.elements;
   let jsonObj = {};
-  for (let i = 0 ; i < elements.length; i++) {
-    if (elements[i].type !=="submit") {
+  for (let i = 0; i < elements.length; i++) {
+    if (elements[i].type !== "submit") {
       console.log(elements[i].name);
       console.log(elements[i].value);
       jsonObj[elements[i].name] = elements[i].value;
@@ -313,4 +304,132 @@ const streamFiles = (ipfs, directory, files, cb) => {
   stream.end();
   console.timeEnd('stream file');
 }
+
+const initReceiveFunction = async () => {
+  let result = await getAddresss();
+  console.log(`request data = ${JSON.stringify(result)}`);
+
+  // let receive = document.getElementById('receive');
+  // let controls_div = document.createElement('div');
+  // controls_div.className = 'controls';
+
+
+  // let row_div = document.createElement('div');
+  // row_div.className = 'row';
+
+
+  // let col_md_6_div = document.createElement('div');
+  // col_md_6_div.className = 'col-md-6s';
+
+
+  // var select = document.createElement("select");
+  // select.id = "number-multiple";
+  // select.setAttribute("class", "selectpicker form-control");
+  // select.setAttribute("data-live-search", "true");
+  // select.setAttribute("data-container", "body");
+  // select.setAttribute("multiple", "true");
+  // select.setAttribute("data-hide-disabled", "true");
+  // select.setAttribute("data-actions-box", "true");
+  // select.setAttribute("data-virtual-scroll", "true");
+
+  // col_md_6_div.appendChild(select);
+  // row_div.appendChild(col_md_6_div);
+  // controls_div.appendChild(row_div);
+  // receive.appendChild(controls_div);
+  //   <div class="controls">
+  //   <div class="row">
+  //       <!-- sender field -->
+  //       <div class="col-md-6">
+  //           <select multiple class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true" title="Select address"
+  //               data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
+  //       </div>
+
+  //   </div>
+  // </div>
+
+
+
+  var address_array = result.newAddressArray;
+  var options = [], _options;
+  var selected_address = [];
+
+
+  for (var i = 0; i < address_array.length; i++) {
+    var option = '<option value="' + i + '">' + address_array[i] + '</option>';
+    options.push(option);
+  
+  }
+
+  _options = options.join('');
+
+  let dropdown = $('#number-multiple')[0];
+  console.log(`options = ${options}`);
+  dropdown.innerHTML = _options;
+  $(".selectpicker").selectpicker('refresh');//important
+
+  console.log(`dropdown = ${dropdown.innerHTML}`);
+
+  $("#number-multiple").on("changed.bs.select",
+    async function () {
+      selected_address = $('#number-multiple').selectpicker('val');
+      let result = await getTx(address_array[selected_address[0]]);
+
+    });
+}
+
+const getAddresss = async () => {
+  let response = await fetch("http://localhost:3000/createAddress?count=5", {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
+      'Accept': 'application/json'
+    }
+  });
+  let fallingResult = null, finalResult = null;
+  if (response.status == 200 || response.status == 201) {
+    finalResult = response;
+  } else {
+    fallingResult = response;
+  }
+  if (finalResult !== null) {
+    let data = await finalResult.json();
+
+
+    return data;
+  } else {
+    let err = await fallingResult.json();
+    throw err;
+  }
+
+}
+
+const getTx = async (address) => {
+  console.log(`getTx = ${address}`);
+  console.log("getTx url "+"http://localhost:3000/txs?address="+address);
+  let response = await fetch("http://localhost:3000/txs?address="+address, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
+      'Accept': 'application/json'
+    }
+  });
+  let fallingResult = null, finalResult = null;
+  if (response.status == 200 || response.status == 201) {
+    finalResult = response;
+  } else {
+    fallingResult = response;
+  }
+  if (finalResult !== null) {
+    let data = await finalResult.json();
+    console.log(`getTx data  = ${JSON.stringify(data)}`);
+
+    return data;
+  } else {
+    let err = await fallingResult.json();
+    throw err;
+  }
+
+}
+
+
 
