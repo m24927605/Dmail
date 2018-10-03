@@ -18,6 +18,17 @@ const bindSubmit = () => {
   contactForm.onsubmit = (event) => {
     //replace orginal form.submit
     event.preventDefault();
+    swal({
+      title: '發送中',
+      showCloseButton: true,
+      onOpen: function () {
+        swal.showLoading();
+      },
+      onClose: function () {
+        console.log('close');
+        //clearTimeout(timer);
+      }
+    });
     console.log('submit');
     let targetForm  = event.target;
     let result = formSerialize(targetForm);
@@ -188,41 +199,39 @@ function upload() {
   let curFiles = uploadFileInput.files;
   const repoPath = 'ipfs-' + Math.random();
   const ipfs = new Ipfs({ repo: repoPath });
-  
+
   //ipfs準備好了
   console.time('ipfs ready');
   ipfs.on('ready', async () => {
-      console.timeEnd('ipfs ready');
-      const directory = 'directory';
-      const files = await readFiles(ipfs, directory, curFiles);
-      console.log(`即將上傳${files.length}個檔到ipfs上面`);
+    console.timeEnd('ipfs ready');
+    const directory = 'directory';
+    const files = await readFiles(ipfs, directory, curFiles);
+    console.log(`即將上傳${files.length}個檔到ipfs上面`);
 
-      streamFiles(ipfs, directory, files, (err, directoryHash) => {
-          if (err) {
-              console.log(`There was an error adding the files ${err}`)
+    streamFiles(ipfs, directory, files, (err, directoryHash) => {
+      if (err) {
+        console.log(`There was an error adding the files ${err}`);
+        swal({
+          html: '發送失敗' + '<br/>err = ' + err,
+          type: 'error',
+          showCloseButton: true,
+          confirmButtonText: '確定'
+        });
+      } else {
+        console.log("https://ipfs.io/ipfs/" + directoryHash);
+
+        let directoryHTML = "https://ipfs.io/ipfs/" + directoryHash;
+        swal({
+          html: '發送完成' + '<br/><a target="_blank" href=' + directoryHTML + '>請點我</a>',
+          type: 'success',
+          showCloseButton: true,
+          confirmButtonText: '確定',
+          onOpen: function () {
+            console.log(`onOpen = ${directoryHash}`)
           }
-          console.log("https://ipfs.io/ipfs/"+directoryHash);
-          
-          //
-          // ipfs.ls(directoryHash, (err, files) => {
-          //     if (err) {
-          //         console.log(`There was an error listing the files ${err}`)
-          //     }
-          //     var list = document.createElement('ul');
-          //     var item = document.createElement('li');
-          //     item.appendChild(document.createTextNode("directory hash = " + directoryHash));
-          //     list.appendChild(item);
-          //     files.forEach((file, index) => {
-          //         item = document.createElement('li');
-          //         item.appendChild(document.createTextNode(`name = ${file.name} hash = ${file.hash}`));
-          //         list.appendChild(item);
-          //     })
-          //     directory_hash.appendChild(list);
-
-          //     ipfs_link.style.display = "inline";
-          //     ipfs_link.href = "https://ipfs.io/ipfs/"+directoryHash;
-          // })
-      })
+        });
+      }
+    })
   })
 }
 
@@ -233,15 +242,15 @@ function upload() {
 * @param {*} curFiles 上傳的檔案
 */
 const readFiles = async (ipfs, directory, curFiles) => {
- 
+
   let promiseArray = [];
- console.time('read file');
+  console.time('read file');
   for (let i = 0; i < curFiles.length; i++) {
-     
-      let readFilePromise =  awaitReadFile(ipfs, directory, curFiles[i]);
-      
-      promiseArray.push(readFilePromise);
-      // 
+
+    let readFilePromise = awaitReadFile(ipfs, directory, curFiles[i]);
+
+    promiseArray.push(readFilePromise);
+    // 
   }
   let files = await Promise.all(promiseArray);
   console.timeEnd('read file');
@@ -259,24 +268,24 @@ const readFiles = async (ipfs, directory, curFiles) => {
 async function awaitReadFile(ipfs, directory, file) {
   let fr = new FileReader();
   return new Promise((resolve, reject) => {
-      fr.onload = function (fileLoadedEvent) {
-          console.log("onload");
-          let fileType = file.name.split('.').pop();
-          if (fileType === "txt") {
-              let textFromFileLoaded = fileLoadedEvent.target.result;
-              //若是文字檔，則直接用utf8即可
-              resolve({
-                  path: `${directory}/${file.name}`,
-                  content: ipfs.types.Buffer.from(textFromFileLoaded, "utf8")
-              });
-          } else {
-              resolve({
-                  path: `${directory}/${file.name}`,
-                  content: ipfs.types.Buffer.from(btoa(fr.result), "base64")
-              });
-          }
+    fr.onload = function (fileLoadedEvent) {
+      console.log("onload");
+      let fileType = file.name.split('.').pop();
+      if (fileType === "txt") {
+        let textFromFileLoaded = fileLoadedEvent.target.result;
+        //若是文字檔，則直接用utf8即可
+        resolve({
+          path: `${directory}/${file.name}`,
+          content: ipfs.types.Buffer.from(textFromFileLoaded, "utf8")
+        });
+      } else {
+        resolve({
+          path: `${directory}/${file.name}`,
+          content: ipfs.types.Buffer.from(btoa(fr.result), "base64")
+        });
       }
-      fr.readAsBinaryString(file);
+    }
+    fr.readAsBinaryString(file);
   });
 }
 /**
@@ -292,11 +301,11 @@ const streamFiles = (ipfs, directory, files, cb) => {
   const stream = ipfs.files.addReadableStream();
   console.time('stream file');
   stream.on('data', function (data) {
-      console.log(`Added ${data.path} hash: ${data.hash}`)
-      // The last data event will contain the directory hash
-      if (data.path === directory) {
-          cb(null, data.hash)
-      }
+    console.log(`Added ${data.path} hash: ${data.hash}`)
+    // The last data event will contain the directory hash
+    if (data.path === directory) {
+      cb(null, data.hash)
+    }
   })
   // Add the files one by one
   files.forEach(file => stream.write(file));
