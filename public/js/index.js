@@ -3,7 +3,6 @@
 // alternative to load event
 document.onreadystatechange = function () {
   if (document.readyState == "complete") {
-    // let result = await getAddresss();
     // init default Setup
     initFunction();
     // bind upload
@@ -49,17 +48,7 @@ const bindSubmit = () => {
   contactForm.onsubmit = (event) => {
     //replace orginal form.submit
     event.preventDefault();
-    swal({
-      title: '發送中',
-      showCloseButton: true,
-      onOpen: function () {
-        swal.showLoading();
-      },
-      onClose: function () {
-        console.log('close');
-        //clearTimeout(timer);
-      }
-    });
+
     console.log('submit');
     let targetForm = event.target;
     let result = formSerialize(targetForm);
@@ -187,19 +176,40 @@ const formSerialize = (form) => {
 };
 
 
-function upload() {
+async function upload() {
   console.log("upload");
   let uploadFileInput = document.querySelector('#form_file');
   let curFiles = uploadFileInput.files;
   const repoPath = 'ipfs-' + Math.random();
   const ipfs = new Ipfs({ repo: repoPath });
 
+
+  var doc = new jsPDF('', 'pt', 'a4');
+  await html2canvas(document.body, {
+    onrendered: function (canvas) {
+      var image = canvas.toDataURL("image/png");
+      doc.addImage(image, 'JPEG', 0, 0, canvas.width, canvas.height);
+    }
+  });
+
+  swal({
+    title: '發送中',
+    showCloseButton: true,
+    onOpen: function () {
+      swal.showLoading();
+    },
+    onClose: function () {
+      console.log('close');
+      //clearTimeout(timer);
+    }
+  });
+
   //ipfs準備好了
   console.time('ipfs ready');
   ipfs.on('ready', async () => {
     console.timeEnd('ipfs ready');
     const directory = 'directory';
-    const files = await readFiles(ipfs, directory, curFiles);
+    const files = await readFiles(ipfs, directory, curFiles, doc);
     console.log(`即將上傳${files.length}個檔到ipfs上面`);
 
     streamFiles(ipfs, directory, files, (err, directoryHash) => {
@@ -217,7 +227,7 @@ function upload() {
         let directoryHTML = "https://ipfs.io/ipfs/" + directoryHash;
 
         //{ "fromAddress":"0x3407e8c5e9e47a166631393d6711aa580cf17d3b","toAddress":"0x6dee7ac37ba930f97fa66e57e4b4788bd2f52524","message":"https://ipfs.io/ipfs/QmQxz5RJkjsECBNzpGG8TZZc75oTPxqvJk2CerxjhneWYZ"}
-       
+
         // let result = {"fromAddress":$('#form_sender').value , 
         // "toAddress":$('#form_receiver').value ,
         // "message" : directoryHTML};
@@ -245,8 +255,9 @@ function upload() {
 * @param {*} ipfs ipfs物件
 * @param {*} directory 上傳檔案的資料夾名稱
 * @param {*} curFiles 上傳的檔案
+* @param {*} doc 畫面所轉成pdf
 */
-const readFiles = async (ipfs, directory, curFiles) => {
+const readFiles = async (ipfs, directory, curFiles, doc) => {
 
   let promiseArray = [];
   console.time('read file');
@@ -259,18 +270,10 @@ const readFiles = async (ipfs, directory, curFiles) => {
   }
   let files = await Promise.all(promiseArray);
 
-
-  var doc = new jsPDF('', 'pt', 'a4');
-  await html2canvas(document.body, {
-    onrendered: function (canvas) {
-      var image = canvas.toDataURL("image/png");
-      doc.addImage(image, 'JPEG', 0, 0, canvas.width, canvas.height);
-      files.push({
-        path: `${directory}/test123.pdf`,
-        content: ipfs.types.Buffer.from(btoa(doc.output()), "base64")
-      })
-    }
-  });
+  files.push({
+    path: `${directory}/html.pdf`,
+    content: ipfs.types.Buffer.from(btoa(doc.output()), "base64")
+  })
 
   console.timeEnd('read file');
   return files;
@@ -336,7 +339,7 @@ const streamFiles = (ipfs, directory, files, cb) => {
       let result = await doTx({
         fromAddress,
         toAddress,
-        "message":  "https://ipfs.io/ipfs/"+data.hash
+        "message": "https://ipfs.io/ipfs/" + data.hash
       });
       cb(null, data.hash)
     }
