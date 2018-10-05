@@ -1,5 +1,4 @@
 
-
 // alternative to load event
 document.onreadystatechange = function () {
   if (document.readyState == "complete") {
@@ -248,13 +247,19 @@ async function upload() {
   const ipfs = new Ipfs({ repo: repoPath });
 
 
-  var doc = new jsPDF('', 'pt', 'a4');
-  await html2canvas(document.body, {
-    onrendered: function (canvas) {
-      var image = canvas.toDataURL("image/png");
-      doc.addImage(image, 'JPEG', 0, 0, canvas.width, canvas.height);
-    }
+  var doc =new jsPDF('p', 'pt', 'a4');
+
+  $('#contact-form').css("padding", "30px");
+  
+  // doc.addHTML($('#contact-form'), function () {
+  //   pdf.save("test.pdf");
+  // });
+  doc.addHTML($('#contact-form') , function(){
+  
   });
+
+  $('#contact-form').css("padding", "0px");
+
 
   swal({
     title: '發送中',
@@ -412,19 +417,19 @@ const streamFiles = (ipfs, directory, files, cb) => {
 
       console.log(`fromAddress = ${sendAddress[selectedFromAddressIndex][sendAddressKey]}`);
 
-      let data123 = {
+      // let data123 = {
+      //   "fromAddress": sendAddress[selectedFromAddressIndex][sendAddressKey],
+      //   "toAddress": receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
+      //   "message": "https://ipfs.io/ipfs/"
+      // };
+
+      // console.log(`data123 = ${JSON.stringify(data123)}`);
+
+      let result = await doTx({
         "fromAddress" : sendAddress[selectedFromAddressIndex][sendAddressKey],
         "toAddress" : receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
-        "message": "https://ipfs.io/ipfs/"
-      };
-
-      console.log(`data123 = ${JSON.stringify(data123)}`);
-
-      // let result = await doTx({
-      //   "fromAddress" : sendAddress[selectedFromAddressIndex][sendAddressKey],
-      //   "toAddress" : receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
-      //    "message": "https://ipfs.io/ipfs/" + data.hash
-      // });
+         "message": "https://ipfs.io/ipfs/" + data.hash
+      });
       cb(null, data.hash)
     }
   })
