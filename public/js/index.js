@@ -16,16 +16,80 @@ const initFunction = async () => {
   let form_sender = document.querySelector("#form_sender");
   let form_receiver = document.querySelector('#form_receiver');
 
-  form_sender.placeholder = "Please enter Sender Email*";
-  form_receiver.placeholder = "Please enter Receiver Email*";
-
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     // 获取已激活的标签页的名称
     var activeTab = $(e.target).text();
     changeTab(activeTab);
   });
 
-  await getAddresss();
+
+  let sendStorage = localStorage.getItem('sendAddress');
+  let receiveStorage = localStorage.getItem('receiveAddress');
+
+  // window.localStorage.removeItem("sendAddress");
+  // window.localStorage.removeItem("receiveAddress");
+
+  console.log(`sendStorage = ${sendStorage}`);
+  console.log(`receiveStorage = ${receiveStorage}`);
+
+  let sendAddress = [];
+  let receiveAddress = [];
+
+  if (!sendStorage && !receiveStorage) {
+    console.log('sendStorage is null && receiveStorage is null');
+    let result = await getAddresss(10);
+    let address = result.newAddressArray;
+    let placeNames = ['警察局', '衛生局', '勞工局', '教育局', '社會局'];
+    console.log(`address.length = ${address.length}`);
+    for (let i = 0; i < address.length; i++) {
+      if (i < 5) {
+        let name = `本站${i + 1}`;
+        let obj = {};
+        obj[name] = address[i];
+        sendAddress.push(obj);
+      } else {
+        let name = `${placeNames[i - 5]}`;
+        let obj = {};
+        obj[name] = address[i];
+        receiveAddress.push(obj);
+      }
+    }
+    localStorage.setItem('sendAddress', JSON.stringify(sendAddress));
+    localStorage.setItem('receiveAddress', JSON.stringify(receiveAddress));
+
+
+  } else {
+    console.log('sendStorage is not null && receiveStorage is not null');
+
+    sendAddress = JSON.parse(sendStorage);
+    receiveAddress = JSON.parse(receiveStorage);
+  }
+
+  console.log(`sendAddress = ${JSON.stringify(sendAddress)}`);
+  console.log(`receiveAddress = ${JSON.stringify(receiveAddress)}`);
+
+
+  var sendOptions = [], _sendOptions;
+
+
+  for (let i = 0; i < sendAddress.length; i++) {
+    let key = Object.keys(sendAddress[i]);
+    let option = '<option value="' + i + '">' + key + "(" + sendAddress[i][key] + ")" + '</option>';
+    sendOptions.push(option);
+  }
+  _sendOptions = sendOptions.join('');
+  form_sender.innerHTML = _sendOptions;
+
+  var receiveOptions = [], _receiveOptions;
+  for (let i = 0; i < receiveAddress.length; i++) {
+    let key = Object.keys(receiveAddress[i]);
+    let option = '<option value="' + i + '">' + key + "(" + receiveAddress[i][key] + ")" + '</option>';
+    receiveOptions.push(option);
+  }
+  _receiveOptions = receiveOptions.join('');
+  form_receiver.innerHTML = _receiveOptions;
+
+  $(".selectpicker").selectpicker('refresh');//important
 
 };
 
@@ -327,20 +391,40 @@ const streamFiles = (ipfs, directory, files, cb) => {
     // The last data event will contain the directory hash
     if (data.path === directory) {
 
-      let fromAddress = document.querySelector("#form_sender").value;
-      let toAddress = document.querySelector('#form_receiver').value;
+      // let fromAddress = document.querySelector("#form_sender").value;
+      // let toAddress = document.querySelector('#form_receiver').value;
+      let selectedFromAddressIndex = $("#form_sender").selectpicker('val');
+      let selectedReceiveAddressIndex = $("#form_receiver").selectpicker('val');
 
-      // let data1 = {
-      //   fromAddress, 
-      //          toAddress ,
-      //   "message":  "https://ipfs.io/ipfs/"
-      // };
+      console.log(`selectedFromAddressIndex = ${selectedFromAddressIndex}`);
+      console.log(`selectedReceiveAddressIndex = ${selectedReceiveAddressIndex}`);
 
-      let result = await doTx({
-        fromAddress,
-        toAddress,
-        "message": "https://ipfs.io/ipfs/" + data.hash
-      });
+
+      let sendStorage = localStorage.getItem('sendAddress');
+      let receiveStorage = localStorage.getItem('receiveAddress');
+
+      let sendAddress = JSON.parse(sendStorage);
+      let sendAddressKey = Object.keys(sendAddress[selectedFromAddressIndex]);
+      console.log(`sendAddressKey = ${sendAddressKey}`);
+      let receiveAddress = JSON.parse(receiveStorage);
+      let receiveAddressKey = Object.keys(receiveAddress[selectedReceiveAddressIndex]);
+      console.log(`receiveAddressKey = ${receiveAddressKey}`);
+
+      console.log(`fromAddress = ${sendAddress[selectedFromAddressIndex][sendAddressKey]}`);
+
+      let data123 = {
+        "fromAddress" : sendAddress[selectedFromAddressIndex][sendAddressKey],
+        "toAddress" : receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
+        "message": "https://ipfs.io/ipfs/"
+      };
+
+      console.log(`data123 = ${JSON.stringify(data123)}`);
+
+      // let result = await doTx({
+      //   "fromAddress" : sendAddress[selectedFromAddressIndex][sendAddressKey],
+      //   "toAddress" : receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
+      //    "message": "https://ipfs.io/ipfs/" + data.hash
+      // });
       cb(null, data.hash)
     }
   })
@@ -423,8 +507,8 @@ const initReceiveFunction = async () => {
     });
 }
 
-const getAddresss = async () => {
-  let response = await fetch("http://localhost:3000/createAddress?count=5", {
+const getAddresss = async (count) => {
+  let response = await fetch(`http://localhost:3000/createAddress?count=${count}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',

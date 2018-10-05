@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/sweetalert2/dist/sweetalert2.css">
 
-    
+
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.2/umd/popper.min.js"></script>
     <script src="/jquery/dist/jquery.min.js"></script>
@@ -60,20 +60,25 @@
                                 <!-- first row -->
                                 <div class="row">
                                     <!-- sender field -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="form_sender" class="color_black">Sender *</label>
-                                            <input id="form_sender" type="text" name="sender" class="form-control" placeholder="Please enter Sender Email *" required="required"
-                                                data-error="Sender is required.">
+                                            <select class="selectpicker form-control" id="form_sender" data-container="body" data-live-search="true" title="Please enter Sender Email *"
+                                                required="required" data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"
+                                                data-error="Sender is required."></select>
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
+                                </div>
+                                <!-- second row -->
+                                <div class="row">
                                     <!-- receiver field -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="form_receiver" class="color_black">Receiver *</label>
-                                            <input id="form_receiver" type="text" name="receiver" class="form-control" placeholder="Please enter Receiver Email *" required="required"
-                                                data-error="Receiver is required.">
+                                            <select class="selectpicker form-control" id="form_receiver" data-container="body" data-live-search="true" title="Please enter Receiver Email *"
+                                                required="required" data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"
+                                                data-error="Receiver is required."></select>
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
@@ -123,14 +128,8 @@
                             <div class="row">
                                 <!-- sender field -->
                                 <div class="col-md-12">
-                                    <select multiple class="selectpicker form-control" 
-                                        id="number-multiple" 
-                                        data-container="body" 
-                                        data-live-search="true" 
-                                        title="Select address"
-                                        data-hide-disabled="true" 
-                                        data-actions-box="true" 
-                                        data-virtual-scroll="true"></select>
+                                    <select class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true" title="Select address"
+                                        data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
                                 </div>
 
                             </div>
@@ -144,6 +143,7 @@
             </div>
             <!-- main page end -->
         </div>
+    </div>
 </body>
 
 </html>
