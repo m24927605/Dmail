@@ -25,29 +25,33 @@ const initFunction = async () => {
   let sendStorage = localStorage.getItem('sendAddress');
   let receiveStorage = localStorage.getItem('receiveAddress');
 
-  // window.localStorage.removeItem("sendAddress");
-  // window.localStorage.removeItem("receiveAddress");
 
   console.log(`sendStorage = ${sendStorage}`);
   console.log(`receiveStorage = ${receiveStorage}`);
 
+
+  // window.localStorage.removeItem("sendAddress");
+  // window.localStorage.removeItem("receiveAddress");
+
   let sendAddress = [];
   let receiveAddress = [];
 
-  if (!sendStorage && !receiveStorage) {
-    console.log('sendStorage is null && receiveStorage is null');
-    let result = await getAddresss(10);
+  if (!sendStorage || !receiveStorage) {
+    window.localStorage.removeItem("sendAddress");
+    window.localStorage.removeItem("receiveAddress");
+    console.log('sendStorage is null || receiveStorage is null');
+    let result = await getAddresss(20);
     let address = result.newAddressArray;
     let placeNames = ['警察局', '衛生局', '交通局', '環保局', '消防局'];
     console.log(`address.length = ${address.length}`);
-    for (let i = 0; i < address.length; i++) {
-      if (i < 5) {
-        let name = `本站${i + 1}`;
+    for (let i = 10; i < address.length; i++) {
+      if (i < 15) {
+        let name = `本站${i - 10 + 1}`;
         let obj = {};
         obj[name] = address[i];
         sendAddress.push(obj);
       } else {
-        let name = `${placeNames[i-5]}`;
+        let name = `${placeNames[i-15]}`;
         let obj = {};
         obj[name] = address[i];
         receiveAddress.push(obj);
