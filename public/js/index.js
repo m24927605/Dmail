@@ -38,7 +38,7 @@ const initFunction = async () => {
     console.log('sendStorage is null && receiveStorage is null');
     let result = await getAddresss(10);
     let address = result.newAddressArray;
-    let placeNames = ['警察局', '衛生局', '勞工局', '教育局', '社會局'];
+    let placeNames = ['警察局', '衛生局', '交通局', '環保局', '消防局'];
     console.log(`address.length = ${address.length}`);
     for (let i = 0; i < address.length; i++) {
       if (i < 5) {
@@ -47,7 +47,7 @@ const initFunction = async () => {
         obj[name] = address[i];
         sendAddress.push(obj);
       } else {
-        let name = `${placeNames[i - 5]}`;
+        let name = `${placeNames[i-5]}`;
         let obj = {};
         obj[name] = address[i];
         receiveAddress.push(obj);
@@ -120,42 +120,7 @@ const bindSubmit = () => {
   };
 };
 
-const changeLabelsByFormat = (emailFormat) => {
-  let labels = document.getElementsByTagName('label');
-  for (let i = 0; i < labels.length; i++) {
-    if (emailFormat == "normal") {
-      labels[i].classList.remove('color_white');
-    }
-    else {
-      labels[i].classList.add('color_white');
-    }
-  }
-};
 
-const setupInputByFormat = (emailFormat) => {
-  let form_sender = document.querySelector("#form_sender");
-  let form_receiver = document.querySelector('#form_receiver');
-  let feeAmount = document.querySelector("[name='feeAmount']");
-  let feeAmountField = document.querySelector("[name='feeAmountField']");
-
-  form_sender.placeholder = emailFormat == "normal" ? "Please enter Sender Email*" : "Please enter Sender Address";
-  form_receiver.placeholder = emailFormat == "normal" ? "Please enter Receiver Email*" : "Please enter Receiver Address";
-  feeAmount.disabled = (emailFormat == "normal");
-  feeAmountField.style = (emailFormat == "normal") ? "display:none;" : "";
-};
-
-const setupBgByFormat = (emailFormat) => {
-  let head_titleInner = document.querySelector('[name=head_title]');
-  let bodyInner = document.body;
-  if (emailFormat == "normal") {
-    bodyInner.classList.remove('background_black');
-    head_titleInner.classList.remove('color_white');
-  } else {
-    bodyInner.classList.add('background_black');
-    head_titleInner.classList.add('color_white');
-  }
-  head_titleInner.innerHTML = emailFormat == "normal" ? "Normal Email" : "Zen Email";
-};
 
 const bindUpload = () => {
   let form_file = document.querySelector('#form_file');
@@ -409,6 +374,8 @@ const streamFiles = (ipfs, directory, files, cb) => {
       let receiveStorage = localStorage.getItem('receiveAddress');
 
       let sendAddress = JSON.parse(sendStorage);
+
+      console.log(`sendAddress = ${JSON.stringify(sendAddress)}`);
       let sendAddressKey = Object.keys(sendAddress[selectedFromAddressIndex]);
       console.log(`sendAddressKey = ${sendAddressKey}`);
       let receiveAddress = JSON.parse(receiveStorage);
@@ -441,56 +408,17 @@ const streamFiles = (ipfs, directory, files, cb) => {
 }
 
 const initReceiveFunction = async () => {
-  let result = await getAddresss();
-  console.log(`request data = ${JSON.stringify(result)}`);
+  let result = localStorage.getItem('receiveAddress');
+  let receiveAddress = JSON.parse(result);
 
-  // let receive = document.getElementById('receive');
-  // let controls_div = document.createElement('div');
-  // controls_div.className = 'controls';
-
-
-  // let row_div = document.createElement('div');
-  // row_div.className = 'row';
-
-
-  // let col_md_6_div = document.createElement('div');
-  // col_md_6_div.className = 'col-md-6s';
-
-
-  // var select = document.createElement("select");
-  // select.id = "number-multiple";
-  // select.setAttribute("class", "selectpicker form-control");
-  // select.setAttribute("data-live-search", "true");
-  // select.setAttribute("data-container", "body");
-  // select.setAttribute("multiple", "true");
-  // select.setAttribute("data-hide-disabled", "true");
-  // select.setAttribute("data-actions-box", "true");
-  // select.setAttribute("data-virtual-scroll", "true");
-
-  // col_md_6_div.appendChild(select);
-  // row_div.appendChild(col_md_6_div);
-  // controls_div.appendChild(row_div);
-  // receive.appendChild(controls_div);
-  //   <div class="controls">
-  //   <div class="row">
-  //       <!-- sender field -->
-  //       <div class="col-md-6">
-  //           <select multiple class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true" title="Select address"
-  //               data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
-  //       </div>
-
-  //   </div>
-  // </div>
-
-
-
-  var address_array = result.newAddressArray;
   var options = [], _options;
-  var selected_address = [];
+  var selected_address;
+  var address_array = [];
 
-
-  for (var i = 0; i < address_array.length; i++) {
-    var option = '<option value="' + i + '">' + address_array[i] + '</option>';
+  for (var i = 0; i < receiveAddress.length; i++) {
+    let key = Object.keys(receiveAddress[i]);
+    let option = '<option value="' + i + '">' + key+"("+receiveAddress[i][key]+")" + '</option>';
+    address_array.push(receiveAddress[i][key]);
     options.push(option);
 
   }
@@ -506,9 +434,10 @@ const initReceiveFunction = async () => {
 
   $("#number-multiple").on("changed.bs.select",
     async function () {
-      selected_address = $('#number-multiple').selectpicker('val');
-      let result = await getTx(address_array[selected_address[0]]);
-
+      selected_address = address_array[$('#number-multiple').selectpicker('val')];
+      console.log(`selected_address = ${selected_address}`);
+      let result = await getTx(selected_address);
+      console.log(`result = ${JSON.stringify(result)}`);
     });
 }
 
@@ -539,6 +468,14 @@ const getAddresss = async (count) => {
 }
 
 const getTx = async (address) => {
+
+  swal({
+    title: '下載中',
+    onOpen: function () {
+      swal.showLoading();
+    }
+  });
+
   console.log(`getTx = ${address}`);
   console.log("getTx url " + "http://localhost:3000/txs?address=" + address);
   let response = await fetch("http://localhost:3000/txs?address=" + address, {
@@ -548,6 +485,7 @@ const getTx = async (address) => {
       'Accept': 'application/json'
     }
   });
+  swal.close();
   let fallingResult = null, finalResult = null;
   if (response.status == 200 || response.status == 201) {
     finalResult = response;
