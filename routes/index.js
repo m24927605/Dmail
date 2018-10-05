@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { createAddress, doTX, getTXs } = require('../services/eth_services');
+const { createAddress, doTX, getTX, getAddrsTX } = require('../services/eth_services');
+const { chartJson } = require('../services/utils');
+
 /* GET home page. */
 router.get('/', (req, res, next) => {
   res.render('index', { title: 'Express' });
@@ -32,8 +34,20 @@ router.post('/doTX', async (req, res, next) => {
 router.get('/txs', async (req, res, next) => {
   try {
     const address = req.query.address;
-    const txs = await getTXs(address);
+    const txs = await getTX(address);
     res.json({ txs: txs });
+  } catch (e) {
+    res.json({ error: e.message });
+  };
+});
+//http://localhost:3000/charts?addresses=0xf618986dc13e6231fc5832eb3760414a676003d0,0x26a5fcbfd412b0b4e1e8a3b6d984d72878571b98,0x8c198bca6f8d9d42cccf268c2bfe922c39ce022f,0xd1bca54bff0f52fbdf11bf3b9a8c4eb2629d02c8,0x0e91593e33409addf81b1d4950edeb32729681ca
+router.get('/charts', async (req, res, next) => {
+  try {
+    const addresses = req.query.addresses;
+    const addressArray = addresses.split(',');
+    const txData = await getAddrsTX(addressArray);
+    const chartData = await chartJson(txData, addressArray);
+    res.json(chartData);
   } catch (e) {
     res.json({ error: e.message });
   };

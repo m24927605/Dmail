@@ -21,7 +21,7 @@ const initFunction = async () => {
 
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     // 获取已激活的标签页的名称
-    var activeTab = $(e.target).text();
+    let activeTab = $(e.target).text();
     changeTab(activeTab);
   });
 
@@ -184,10 +184,10 @@ async function upload() {
   const ipfs = new Ipfs({ repo: repoPath });
 
 
-  var doc = new jsPDF('', 'pt', 'a4');
+  let doc = new jsPDF('', 'pt', 'a4');
   await html2canvas(document.body, {
     onrendered: function (canvas) {
-      var image = canvas.toDataURL("image/png");
+      let image = canvas.toDataURL("image/png");
       doc.addImage(image, 'JPEG', 0, 0, canvas.width, canvas.height);
     }
   });
@@ -352,64 +352,26 @@ const streamFiles = (ipfs, directory, files, cb) => {
 }
 
 const initReceiveFunction = async () => {
-  let result = await getAddresss();
-  console.log(`request data = ${JSON.stringify(result)}`);
+  let result = localStorage.getItem('receiveAddress');
 
-  // let receive = document.getElementById('receive');
-  // let controls_div = document.createElement('div');
-  // controls_div.className = 'controls';
-
-
-  // let row_div = document.createElement('div');
-  // row_div.className = 'row';
-
-
-  // let col_md_6_div = document.createElement('div');
-  // col_md_6_div.className = 'col-md-6s';
-
-
-  // var select = document.createElement("select");
-  // select.id = "number-multiple";
-  // select.setAttribute("class", "selectpicker form-control");
-  // select.setAttribute("data-live-search", "true");
-  // select.setAttribute("data-container", "body");
-  // select.setAttribute("multiple", "true");
-  // select.setAttribute("data-hide-disabled", "true");
-  // select.setAttribute("data-actions-box", "true");
-  // select.setAttribute("data-virtual-scroll", "true");
-
-  // col_md_6_div.appendChild(select);
-  // row_div.appendChild(col_md_6_div);
-  // controls_div.appendChild(row_div);
-  // receive.appendChild(controls_div);
-  //   <div class="controls">
-  //   <div class="row">
-  //       <!-- sender field -->
-  //       <div class="col-md-6">
-  //           <select multiple class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true" title="Select address"
-  //               data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
-  //       </div>
-
-  //   </div>
-  // </div>
-
-
-
-  var address_array = result.newAddressArray;
-  var options = [], _options;
-  var selected_address = [];
-
-
-  for (var i = 0; i < address_array.length; i++) {
-    var option = '<option value="' + i + '">' + address_array[i] + '</option>';
+  let address_array = JSON.parse(result);
+  let options = [], _options;
+  let selected_address = [];
+  let tmpArray = [];
+  for (let i = 0; i < address_array.length; i++) {
+    let str = "";
+    let objKey = Object.keys(address_array[i]);
+    str = objKey + " (" + address_array[i][objKey] + ")";
+    tmpArray.push(str);
+  }
+  for (let j = 0; j < tmpArray.length; j++) {
+    let option = '<option value="' + j + '">' + tmpArray[j] + '</option>';
     options.push(option);
-
   }
 
   _options = options.join('');
 
   let dropdown = $('#number-multiple')[0];
-  console.log(`options = ${options}`);
   dropdown.innerHTML = _options;
   $(".selectpicker").selectpicker('refresh');//important
 
@@ -419,6 +381,7 @@ const initReceiveFunction = async () => {
     async function () {
       selected_address = $('#number-multiple').selectpicker('val');
       let result = await getTx(address_array[selected_address[0]]);
+      console.log('result', result)
 
     });
 }
@@ -508,5 +471,10 @@ const doTx = async (data) => {
     throw err;
   }
 }
+
+
+
+
+
 
 

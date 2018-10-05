@@ -7,6 +7,7 @@ const provider = new Web3.providers.HttpProvider('https://mainnet.infura.io/2c27
 const web3 = new Web3(provider);
 const rp = require('request-promise');
 const underscore = require('underscore');
+const moment = require('moment');
 
 exports.createAddress = (addressCount) => {
   return new Promise((resolve, reject) => {
@@ -67,7 +68,7 @@ exports.doTX = (fromAddress, toAddress, message) => {
   });
 };
 
-exports.getTXs = (address) => {
+exports.getTX = (address) => {
   return new Promise(async (resolve, reject) => {
     try {
       const options = {
@@ -77,7 +78,9 @@ exports.getTXs = (address) => {
       const res = await rp.get(options);
       const result = res.result.map((obj) => {
         obj.input = web3.utils.toAscii(obj.input);
-        return { txid: obj.hash, confirmations: parseInt(obj.confirmations), fromAddress: obj.from, toAddress: obj.to, message: obj.input };
+        obj.date = moment.unix(obj.timeStamp).format("YYYY-MM-DD");
+        obj.dateTime = moment.unix(obj.timeStamp).format("YYYY-MM-DD HH:mm:ss");
+        return { txid: obj.hash, confirmations: parseInt(obj.confirmations), fromAddress: obj.from, toAddress: obj.to, message: obj.input, date: obj.date, dateTime: obj.dateTime };
       })
       resolve(underscore.sortBy(result, 'confirmations'));
     } catch (e) {
@@ -86,3 +89,27 @@ exports.getTXs = (address) => {
     }
   });
 };
+
+exports.getAddrsTX = (addrs) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let optionArray = [];
+      for (let addr of addrs) {
+        let option = {
+          uri: `http://api.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=0&endblock=99999999&sort=asc&apikey=QASQCBV73CN8ZCVKPHBYS3AQIPZCMFDZE9`,
+          json: true // Automatically parses the JSON string in the response
+        };
+        optionArray.push(option);
+      }
+      let promises = optionArray.map(option => rp.get(option));
+      Promise.all(promises)
+        .then(res => {
+          resolve(res);
+        })
+        .catch((e) => { reject(e) });
+    } catch (e) {
+      console.error('[getTXs Service Error]', e);
+      reject(e);
+    }
+  });
+}
