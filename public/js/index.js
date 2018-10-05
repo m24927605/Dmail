@@ -1,5 +1,4 @@
 
-
 // alternative to load event
 document.onreadystatechange = function () {
   if (document.readyState == "complete") {
@@ -16,16 +15,80 @@ const initFunction = async () => {
   let form_sender = document.querySelector("#form_sender");
   let form_receiver = document.querySelector('#form_receiver');
 
-  form_sender.placeholder = "Please enter Sender Email*";
-  form_receiver.placeholder = "Please enter Receiver Email*";
-
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     // 获取已激活的标签页的名称
     let activeTab = $(e.target).text();
     changeTab(activeTab);
   });
 
-  await getAddresss();
+
+  let sendStorage = localStorage.getItem('sendAddress');
+  let receiveStorage = localStorage.getItem('receiveAddress');
+
+  // window.localStorage.removeItem("sendAddress");
+  // window.localStorage.removeItem("receiveAddress");
+
+  console.log(`sendStorage = ${sendStorage}`);
+  console.log(`receiveStorage = ${receiveStorage}`);
+
+  let sendAddress = [];
+  let receiveAddress = [];
+
+  if (!sendStorage && !receiveStorage) {
+    console.log('sendStorage is null && receiveStorage is null');
+    let result = await getAddresss(10);
+    let address = result.newAddressArray;
+    let placeNames = ['警察局', '衛生局', '交通局', '環保局', '消防局'];
+    console.log(`address.length = ${address.length}`);
+    for (let i = 0; i < address.length; i++) {
+      if (i < 5) {
+        let name = `本站${i + 1}`;
+        let obj = {};
+        obj[name] = address[i];
+        sendAddress.push(obj);
+      } else {
+        let name = `${placeNames[i - 5]}`;
+        let obj = {};
+        obj[name] = address[i];
+        receiveAddress.push(obj);
+      }
+    }
+    localStorage.setItem('sendAddress', JSON.stringify(sendAddress));
+    localStorage.setItem('receiveAddress', JSON.stringify(receiveAddress));
+
+
+  } else {
+    console.log('sendStorage is not null && receiveStorage is not null');
+
+    sendAddress = JSON.parse(sendStorage);
+    receiveAddress = JSON.parse(receiveStorage);
+  }
+
+  console.log(`sendAddress = ${JSON.stringify(sendAddress)}`);
+  console.log(`receiveAddress = ${JSON.stringify(receiveAddress)}`);
+
+
+  var sendOptions = [], _sendOptions;
+
+
+  for (let i = 0; i < sendAddress.length; i++) {
+    let key = Object.keys(sendAddress[i]);
+    let option = '<option value="' + i + '">' + key + "(" + sendAddress[i][key] + ")" + '</option>';
+    sendOptions.push(option);
+  }
+  _sendOptions = sendOptions.join('');
+  form_sender.innerHTML = _sendOptions;
+
+  var receiveOptions = [], _receiveOptions;
+  for (let i = 0; i < receiveAddress.length; i++) {
+    let key = Object.keys(receiveAddress[i]);
+    let option = '<option value="' + i + '">' + key + "(" + receiveAddress[i][key] + ")" + '</option>';
+    receiveOptions.push(option);
+  }
+  _receiveOptions = receiveOptions.join('');
+  form_receiver.innerHTML = _receiveOptions;
+
+  $(".selectpicker").selectpicker('refresh');//important
 
 };
 
@@ -57,42 +120,7 @@ const bindSubmit = () => {
   };
 };
 
-const changeLabelsByFormat = (emailFormat) => {
-  let labels = document.getElementsByTagName('label');
-  for (let i = 0; i < labels.length; i++) {
-    if (emailFormat == "normal") {
-      labels[i].classList.remove('color_white');
-    }
-    else {
-      labels[i].classList.add('color_white');
-    }
-  }
-};
 
-const setupInputByFormat = (emailFormat) => {
-  let form_sender = document.querySelector("#form_sender");
-  let form_receiver = document.querySelector('#form_receiver');
-  let feeAmount = document.querySelector("[name='feeAmount']");
-  let feeAmountField = document.querySelector("[name='feeAmountField']");
-
-  form_sender.placeholder = emailFormat == "normal" ? "Please enter Sender Email*" : "Please enter Sender Address";
-  form_receiver.placeholder = emailFormat == "normal" ? "Please enter Receiver Email*" : "Please enter Receiver Address";
-  feeAmount.disabled = (emailFormat == "normal");
-  feeAmountField.style = (emailFormat == "normal") ? "display:none;" : "";
-};
-
-const setupBgByFormat = (emailFormat) => {
-  let head_titleInner = document.querySelector('[name=head_title]');
-  let bodyInner = document.body;
-  if (emailFormat == "normal") {
-    bodyInner.classList.remove('background_black');
-    head_titleInner.classList.remove('color_white');
-  } else {
-    bodyInner.classList.add('background_black');
-    head_titleInner.classList.add('color_white');
-  }
-  head_titleInner.innerHTML = emailFormat == "normal" ? "Normal Email" : "Zen Email";
-};
 
 const bindUpload = () => {
   let form_file = document.querySelector('#form_file');
@@ -184,13 +212,19 @@ async function upload() {
   const ipfs = new Ipfs({ repo: repoPath });
 
 
-  let doc = new jsPDF('', 'pt', 'a4');
-  await html2canvas(document.body, {
-    onrendered: function (canvas) {
-      let image = canvas.toDataURL("image/png");
-      doc.addImage(image, 'JPEG', 0, 0, canvas.width, canvas.height);
-    }
+  var doc = new jsPDF('p', 'pt', 'a4');
+
+  $('#contact-form').css("padding", "30px");
+
+  // doc.addHTML($('#contact-form'), function () {
+  //   pdf.save("test.pdf");
+  // });
+  doc.addHTML($('#contact-form'), function () {
+
   });
+
+  $('#contact-form').css("padding", "0px");
+
 
   swal({
     title: '發送中',
@@ -327,18 +361,40 @@ const streamFiles = (ipfs, directory, files, cb) => {
     // The last data event will contain the directory hash
     if (data.path === directory) {
 
-      let fromAddress = document.querySelector("#form_sender").value;
-      let toAddress = document.querySelector('#form_receiver').value;
+      // let fromAddress = document.querySelector("#form_sender").value;
+      // let toAddress = document.querySelector('#form_receiver').value;
+      let selectedFromAddressIndex = $("#form_sender").selectpicker('val');
+      let selectedReceiveAddressIndex = $("#form_receiver").selectpicker('val');
 
-      // let data1 = {
-      //   fromAddress, 
-      //          toAddress ,
-      //   "message":  "https://ipfs.io/ipfs/"
+      console.log(`selectedFromAddressIndex = ${selectedFromAddressIndex}`);
+      console.log(`selectedReceiveAddressIndex = ${selectedReceiveAddressIndex}`);
+
+
+      let sendStorage = localStorage.getItem('sendAddress');
+      let receiveStorage = localStorage.getItem('receiveAddress');
+
+      let sendAddress = JSON.parse(sendStorage);
+
+      console.log(`sendAddress = ${JSON.stringify(sendAddress)}`);
+      let sendAddressKey = Object.keys(sendAddress[selectedFromAddressIndex]);
+      console.log(`sendAddressKey = ${sendAddressKey}`);
+      let receiveAddress = JSON.parse(receiveStorage);
+      let receiveAddressKey = Object.keys(receiveAddress[selectedReceiveAddressIndex]);
+      console.log(`receiveAddressKey = ${receiveAddressKey}`);
+
+      console.log(`fromAddress = ${sendAddress[selectedFromAddressIndex][sendAddressKey]}`);
+
+      // let data123 = {
+      //   "fromAddress": sendAddress[selectedFromAddressIndex][sendAddressKey],
+      //   "toAddress": receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
+      //   "message": "https://ipfs.io/ipfs/"
       // };
 
+      // console.log(`data123 = ${JSON.stringify(data123)}`);
+
       let result = await doTx({
-        fromAddress,
-        toAddress,
+        "fromAddress": sendAddress[selectedFromAddressIndex][sendAddressKey],
+        "toAddress": receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
         "message": "https://ipfs.io/ipfs/" + data.hash
       });
       cb(null, data.hash)
@@ -353,19 +409,16 @@ const streamFiles = (ipfs, directory, files, cb) => {
 
 const initReceiveFunction = async () => {
   let result = localStorage.getItem('receiveAddress');
+  let receiveAddress = JSON.parse(result);
 
-  let address_array = JSON.parse(result);
-  let options = [], _options;
-  let selected_address = [];
-  let tmpArray = [];
-  for (let i = 0; i < address_array.length; i++) {
-    let str = "";
-    let objKey = Object.keys(address_array[i]);
-    str = objKey + " (" + address_array[i][objKey] + ")";
-    tmpArray.push(str);
-  }
-  for (let j = 0; j < tmpArray.length; j++) {
-    let option = '<option value="' + j + '">' + tmpArray[j] + '</option>';
+  var options = [], _options;
+  var selected_address;
+  var address_array = [];
+
+  for (var i = 0; i < receiveAddress.length; i++) {
+    let key = Object.keys(receiveAddress[i]);
+    let option = '<option value="' + i + '">' + key + "(" + receiveAddress[i][key] + ")" + '</option>';
+    address_array.push(receiveAddress[i][key]);
     options.push(option);
   }
 
@@ -379,15 +432,15 @@ const initReceiveFunction = async () => {
 
   $("#number-multiple").on("changed.bs.select",
     async function () {
-      selected_address = $('#number-multiple').selectpicker('val');
-      let result = await getTx(address_array[selected_address[0]]);
-      console.log('result', result)
-
+      selected_address = address_array[$('#number-multiple').selectpicker('val')];
+      console.log(`selected_address = ${selected_address}`);
+      let result = await getTx(selected_address);
+      console.log(`result = ${JSON.stringify(result)}`);
     });
 }
 
-const getAddresss = async () => {
-  let response = await fetch("http://localhost:3000/createAddress?count=5", {
+const getAddresss = async (count) => {
+  let response = await fetch(`http://localhost:3000/createAddress?count=${count}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
@@ -413,6 +466,14 @@ const getAddresss = async () => {
 }
 
 const getTx = async (address) => {
+
+  swal({
+    title: '下載中',
+    onOpen: function () {
+      swal.showLoading();
+    }
+  });
+
   console.log(`getTx = ${address}`);
   console.log("getTx url " + "http://localhost:3000/txs?address=" + address);
   let response = await fetch("http://localhost:3000/txs?address=" + address, {
@@ -422,6 +483,7 @@ const getTx = async (address) => {
       'Accept': 'application/json'
     }
   });
+  swal.close();
   let fallingResult = null, finalResult = null;
   if (response.status == 200 || response.status == 201) {
     finalResult = response;

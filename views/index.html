@@ -13,20 +13,13 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/sweetalert2/dist/sweetalert2.css">
 
-  <style>
-    .bar {
-      fill: steelblue;
-    }
-  
-    .bar:hover {
-      fill: brown;
-    }
-  
-    .axis--x path {
-      display: none;
-    }
-  </style>
-  <svg width="960" height="500"></svg>
+
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.2/umd/popper.min.js"></script>
+  <script src="/jquery/dist/jquery.min.js"></script>
+  <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/bootstrap/dist/js/bootstrap-select.js"></script>
 
   <script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.2/umd/popper.min.js"></script>
@@ -66,27 +59,32 @@
           <!-- first tab main-->
           <div class="tab-pane container fade show active" id="main" role="tabpanel">
             <!-- form start -->
-            <form id="contact-form" method="post" role="form">
+            <form id="contact-form" method="post" role="form" style="background-color: white">
 
               <div class="messages"></div>
               <div class="controls">
                 <!-- first row -->
                 <div class="row">
                   <!-- sender field -->
-                  <div class="col-md-6">
+                  <div class="col-md-12">
                     <div class="form-group">
                       <label for="form_sender" class="color_black">Sender *</label>
-                      <input id="form_sender" type="text" name="sender" class="form-control" placeholder="Please enter Sender Email *"
-                        required="required" data-error="Sender is required.">
+                      <select class="selectpicker form-control" id="form_sender" data-container="body" data-live-search="true"
+                        title="Please enter Sender Email *" required="required" data-hide-disabled="true"
+                        data-actions-box="true" data-virtual-scroll="true" data-error="Sender is required."></select>
                       <div class="help-block with-errors"></div>
                     </div>
                   </div>
+                </div>
+                <!-- second row -->
+                <div class="row">
                   <!-- receiver field -->
-                  <div class="col-md-6">
+                  <div class="col-md-12">
                     <div class="form-group">
                       <label for="form_receiver" class="color_black">Receiver *</label>
-                      <input id="form_receiver" type="text" name="receiver" class="form-control" placeholder="Please enter Receiver Email *"
-                        required="required" data-error="Receiver is required.">
+                      <select class="selectpicker form-control" id="form_receiver" data-container="body"
+                        data-live-search="true" title="Please enter Receiver Email *" required="required"
+                        data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true" data-error="Receiver is required."></select>
                       <div class="help-block with-errors"></div>
                     </div>
                   </div>
@@ -100,7 +98,7 @@
 
                       <input id="form_file" type="file" name="email" class="form-control" placeholder="Attach your File"
                         multiple accept="image/*,.pdf,.mp4,.txt,.zip,.json" draggable="true">
-                      <div class="files_list" name="files_list">Please attach your file*</div>
+                      <div class="files_list" name="files_list">Please attach your file</div>
                       <div class="help-block with-errors"></div>
 
                     </div>
@@ -128,31 +126,71 @@
             </form>
             <!-- form end -->
           </div>
-          <!-- first tab main end -->
+        </div>
+      </div>
+      <!-- second row -->
+      <div class="row">
+        <!-- File field -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="form_file" class="color_black">File Attach</label>
 
-          <!-- second tab -->
-          <div class="tab-pane container fade" id="receive" role="tabpanel">
-            <div class="controls">
-              <div class="row">
-                <!-- sender field -->
-                <div class="col-md-12">
-                  <select class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true"
-                    title="Select address" data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
+            <!-- second tab -->
+            <div class="tab-pane container fade" id="receive" role="tabpanel">
+              <div class="controls">
+                <div class="row">
+                  <!-- sender field -->
+                  <div class="col-md-12">
+                    <select class="selectpicker form-control" id="number-multiple" data-container="body"
+                      data-live-search="true" title="Select address" data-hide-disabled="true" data-actions-box="true"
+                      data-virtual-scroll="true"></select>
+                  </div>
+
                 </div>
-
               </div>
             </div>
-            <!-- second tab end -->
+            <!-- message box -->
+            <div class="row">
+              <!-- message field -->
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="form_message" class="color_black">Message *</label>
+                  <textarea id="form_message" name="message" class="form-control" placeholder="Message for Receiver *"
+                    rows="4" required="required" data-error="Please, leave us a message."></textarea>
+                  <div class="help-block with-errors"></div>
+                </div>
+              </div>
+              <!-- button field -->
+              <div class="col-md-12">
+                <input type="submit" class="btn btn-success btn-send" value="Send message" name="submitBtn">
+              </div>
+            </div>
+            <!-- message box end -->
           </div>
-          <!-- tab-content end -->
-
+          <!-- control end -->
+          </form>
+          <!-- form end -->
         </div>
-        <!-- rwd ends -->
+        <!-- first tab main end -->
+
+        <!-- second tab -->
+        <div class="tab-pane container fade" id="receive" role="tabpanel">
+          <div class="controls">
+            <div class="row">
+              <!-- sender field -->
+              <div class="col-md-12">
+                <select class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true"
+                  title="Select address" data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
+              </div>
+
+            </div>
+          </div>
+          <!-- second tab end -->
+        </div>
+        <!-- tab-content end -->
+
       </div>
-      <!-- main page end -->
     </div>
-  </div>
-  <script src="/js/index.js"></script>
 </body>
 
 </html>
