@@ -17,7 +17,7 @@ const initFunction = async () => {
 
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     // 获取已激活的标签页的名称
-    var activeTab = $(e.target).text();
+    let activeTab = $(e.target).text();
     changeTab(activeTab);
   });
 
@@ -51,7 +51,7 @@ const initFunction = async () => {
         obj[name] = address[i];
         sendAddress.push(obj);
       } else {
-        let name = `${placeNames[i-15]}`;
+        let name = `${placeNames[i - 15]}`;
         let obj = {};
         obj[name] = address[i];
         receiveAddress.push(obj);
@@ -216,15 +216,15 @@ async function upload() {
   const ipfs = new Ipfs({ repo: repoPath });
 
 
-  var doc =new jsPDF('p', 'pt', 'a4');
+  var doc = new jsPDF('p', 'pt', 'a4');
 
   $('#contact-form').css("padding", "30px");
-  
+
   // doc.addHTML($('#contact-form'), function () {
   //   pdf.save("test.pdf");
   // });
-  doc.addHTML($('#contact-form') , function(){
-  
+  doc.addHTML($('#contact-form'), function () {
+
   });
 
   $('#contact-form').css("padding", "0px");
@@ -397,9 +397,9 @@ const streamFiles = (ipfs, directory, files, cb) => {
       // console.log(`data123 = ${JSON.stringify(data123)}`);
 
       let result = await doTx({
-        "fromAddress" : sendAddress[selectedFromAddressIndex][sendAddressKey],
-        "toAddress" : receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
-         "message": "https://ipfs.io/ipfs/" + data.hash
+        "fromAddress": sendAddress[selectedFromAddressIndex][sendAddressKey],
+        "toAddress": receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
+        "message": "https://ipfs.io/ipfs/" + data.hash
       });
       cb(null, data.hash)
     }
@@ -421,16 +421,14 @@ const initReceiveFunction = async () => {
 
   for (var i = 0; i < receiveAddress.length; i++) {
     let key = Object.keys(receiveAddress[i]);
-    let option = '<option value="' + i + '">' + key+"("+receiveAddress[i][key]+")" + '</option>';
+    let option = '<option value="' + i + '">' + key + "(" + receiveAddress[i][key] + ")" + '</option>';
     address_array.push(receiveAddress[i][key]);
     options.push(option);
-
   }
 
   _options = options.join('');
 
   let dropdown = $('#number-multiple')[0];
-  console.log(`options = ${options}`);
   dropdown.innerHTML = _options;
   $(".selectpicker").selectpicker('refresh');//important
 
@@ -539,5 +537,10 @@ const doTx = async (data) => {
     throw err;
   }
 }
+
+
+
+
+
 
 
