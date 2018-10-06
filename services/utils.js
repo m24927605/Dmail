@@ -3,7 +3,7 @@ exports.chartJson = (txs, addrs) => {
     try {
       for (let [index, addr] of addrs.entries()) {
         txs[index]['addr'] = addr;
-        txs[index]['count'] = txs[index]['result'].length;
+        txs[index]['count'] = txs[index].length;
       }
       resolve(txs);
     } catch (e) {

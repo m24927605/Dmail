@@ -101,7 +101,18 @@ exports.getAddrsTX = (addrs) => {
         };
         optionArray.push(option);
       }
-      let promises = optionArray.map(option => rp.get(option));
+      let promises = optionArray.map((option) => {
+        return rp.get(option).then((response) => {
+          return response.result.map((obj) => {
+            obj.input = web3.utils.toAscii(obj.input);
+            obj.date = moment.unix(obj.timeStamp).format("YYYY-MM-DD");
+            obj.dateTime = moment.unix(obj.timeStamp).format("YYYY-MM-DD HH:mm:ss");
+            return { txid: obj.hash, confirmations: parseInt(obj.confirmations), fromAddress: obj.from, toAddress: obj.to, message: obj.input, date: obj.date, dateTime: obj.dateTime };
+          })
+        }).catch((e) => {
+          reject(e);
+        })
+      });
       Promise.all(promises)
         .then(res => {
           resolve(res);
