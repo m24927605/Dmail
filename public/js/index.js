@@ -431,12 +431,8 @@ const initReceiveFunction = async () => {
 
     $("#number-multiple").on("changed.bs.select",
       async function () {
-        selected_address = address_array[$('#number-multiple').selectpicker('val')];
-        console.log(`selected_address = ${selected_address}`);
-        // let result = await getTx(selected_address);
-        console.log(`result = ${JSON.stringify(chartsResult[selected_address])}`);
-
-
+        console.log(`result = ${JSON.stringify(chartsResult[$('#number-multiple').selectpicker('val')])}`);
+        insertTable(chartsResult[$('#number-multiple').selectpicker('val')]);
       });
 
 
@@ -599,4 +595,17 @@ const drawChart = (receiveAddress, chartsResult) => {
       }
     }
   });
+}
+
+const insertTable = (data) => {
+  let rowCount = table.rows.length;
+  for (var i = 0; i < rowCount; i++) {
+    table.deleteRow(0);
+  }
+  for (let i = 0; i < data.length; i++) {
+    let row = table.insertRow(i);
+    let cell = row.insertCell(0);
+    cell.innerHTML = '<div style="padding:10px;">dateTime: ' + data[i].dateTime + '</br>' +
+      'message: <a href=' + data[i].message + ' target="_blank">' + data[i].message + '</a></div>';
+  }
 }

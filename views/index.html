@@ -41,10 +41,10 @@
 				<!-- nav tabs -->
 				<ul class="nav nav-tabs" role="tablist">
 					<li class="nav-item">
-						<a class="nav-link active" data-toggle="tab" href="#main" role="tab">Send Mail</a>
+						<a class="nav-link active" data-toggle="tab" href="#main" role="tab">Send</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" data-toggle="tab" href="#receive" role="tab">Receive Mail</a>
+						<a class="nav-link" data-toggle="tab" href="#receive" role="tab">Receive</a>
 					</li>
 				</ul>
 				<!-- tab-content start -->
@@ -62,7 +62,7 @@
 									<div class="col-md-12">
 										<div class="form-group">
 											<label for="form_sender" class="color_black">Sender *</label>
-											<select class="selectpicker form-control" id="form_sender" data-container="body" data-live-search="true" title="Please enter Sender Email *"
+											<select class="selectpicker form-control" id="form_sender" data-container="body" data-live-search="true" title="Please choose*"
 											 required="required" data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true" data-error="Sender is required."></select>
 											<div class="help-block with-errors"></div>
 										</div>
@@ -74,7 +74,7 @@
 									<div class="col-md-12">
 										<div class="form-group">
 											<label for="form_receiver" class="color_black">Receiver *</label>
-											<select class="selectpicker form-control" id="form_receiver" data-container="body" data-live-search="true" title="Please enter Receiver Email *"
+											<select class="selectpicker form-control" id="form_receiver" data-container="body" data-live-search="true" title="Please choose*"
 											 required="required" data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true" data-error="Receiver is required."></select>
 											<div class="help-block with-errors"></div>
 										</div>
@@ -100,15 +100,15 @@
 									<!-- message field -->
 									<div class="col-md-12">
 										<div class="form-group">
-											<label for="form_message" class="color_black">Message *</label>
-											<textarea id="form_message" name="message" class="form-control" placeholder="Message for Receiver *" rows="4" required="required"
+											<label for="form_message" class="color_black">Content *</label>
+											<textarea id="form_message" name="message" class="form-control" placeholder="Content for Receiver *" rows="4" required="required"
 											 data-error="Please, leave us a message."></textarea>
 											<div class="help-block with-errors"></div>
 										</div>
 									</div>
 									<!-- button field -->
 									<div class="col-md-12">
-										<input type="submit" class="btn btn-success btn-send" value="Send message" name="submitBtn">
+										<input type="submit" class="btn btn-success btn-send" value="Send" name="submitBtn">
 									</div>
 								</div>
 								<!-- message box end -->
@@ -123,18 +123,31 @@
 					<div class="tab-pane container fade" id="receive" role="tabpanel">
 						<div class="controls">
 							<div class="row">
-								<!-- sender field -->
+								<!-- dropdown field -->
 								<div class="col-md-12">
-									<select class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true" title="Select address"
+									<select class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true" title="Please choose"
 									 data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
 								</div>
 							</div>
 							<div class="row">
-								<!-- sender field -->
+								<!-- chart field -->
 								<div class="col-md-12">
 									<canvas id="bar-chart"></canvas>
 								</div>
 							</div>
+
+							<div class="row">
+									<!-- chart field -->
+									<div class="col-md-12">
+											<table id="table" class="table-striped" border="solid 1px black">
+									</div>
+								</div>
+
+
+
+
+
+
 						</div>
 						<!-- second tab end -->
 					</div>
