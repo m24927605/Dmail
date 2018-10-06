@@ -1,7 +1,8 @@
-
+var table;
 // alternative to load event
 document.onreadystatechange = function () {
   if (document.readyState == "complete") {
+
     // init default Setup
     initFunction();
     // bind upload
@@ -12,6 +13,7 @@ document.onreadystatechange = function () {
 }
 
 const initFunction = async () => {
+  table = document.querySelector("#table");
   let form_sender = document.querySelector("#form_sender");
   let form_receiver = document.querySelector('#form_receiver');
 
@@ -21,45 +23,45 @@ const initFunction = async () => {
     changeTab(activeTab);
   });
 
+  // window.localStorage.removeItem("sendAddress");
+  // window.localStorage.removeItem("receiveAddress");
 
-  let sendStorage = localStorage.getItem('sendAddress');
-  let receiveStorage = localStorage.getItem('receiveAddress');
-
+  let sendStorage = sessionStorage.getItem('sendAddress');
+  let receiveStorage = sessionStorage.getItem('receiveAddress');
 
   console.log(`sendStorage = ${sendStorage}`);
   console.log(`receiveStorage = ${receiveStorage}`);
-
-
-  // window.localStorage.removeItem("sendAddress");
-  // window.localStorage.removeItem("receiveAddress");
 
   let sendAddress = [];
   let receiveAddress = [];
 
   if (!sendStorage || !receiveStorage) {
-    window.localStorage.removeItem("sendAddress");
-    window.localStorage.removeItem("receiveAddress");
     console.log('sendStorage is null || receiveStorage is null');
-    let result = await getAddresss(20);
-    let address = result.newAddressArray;
-    let placeNames = ['警察局', '衛生局', '交通局', '環保局', '消防局'];
-    console.log(`address.length = ${address.length}`);
-    for (let i = 10; i < address.length; i++) {
-      if (i < 15) {
-        let name = `本站${i - 10 + 1}`;
-        let obj = {};
-        obj[name] = address[i];
-        sendAddress.push(obj);
-      } else {
-        let name = `${placeNames[i - 15]}`;
-        let obj = {};
-        obj[name] = address[i];
-        receiveAddress.push(obj);
+    try {
+      let result = await getAddresss(20);
+      let address = result.newAddressArray;
+      let placeNames = ['警察局', '衛生局', '交通局', '環保局', '消防局'];
+      console.log(`address.length = ${address.length}`);
+      for (let i = 10; i < address.length; i++) {
+        if (i < 15) {
+          let name = `本站${i - 10 + 1}`;
+          let obj = {};
+          obj[name] = address[i];
+          sendAddress.push(obj);
+        } else {
+          let name = `${placeNames[i - 15]}`;
+          let obj = {};
+          obj[name] = address[i];
+          receiveAddress.push(obj);
+        }
       }
-    }
-    localStorage.setItem('sendAddress', JSON.stringify(sendAddress));
-    localStorage.setItem('receiveAddress', JSON.stringify(receiveAddress));
+      sessionStorage.setItem('sendAddress', JSON.stringify(sendAddress));
+      sessionStorage.setItem('receiveAddress', JSON.stringify(receiveAddress));
 
+    } catch (error) {
+      showError(error);
+      return;
+    }
 
   } else {
     console.log('sendStorage is not null && receiveStorage is not null');
@@ -143,17 +145,7 @@ const bindUpload = () => {
     if (filesArr.length == 0) {
       files_list.innerHTML = "please attach files";
     }
-    // let reader = new FileReader();
-    // reader.onload = function(re) {
-    //   let html = `<span>${re.target.result} - ${re}</span>`
-    // };
-    // console.log(filesArr);
-    // if (filesArr.length > 0) {
-    //   form_file.classList.add('zIndex_Minus');
-    // }
-    // else {
-    //   form_file.classList.remove('zIndex_Minus');
-    // }
+
     filesArr.forEach((f, index) => {
       let file = files[index];
       let reader = new FileReader();
@@ -252,9 +244,8 @@ async function upload() {
 
     streamFiles(ipfs, directory, files, (err, directoryHash) => {
       if (err) {
-        console.log(`There was an error adding the files ${err}`);
         swal({
-          html: '發送失敗' + '<br/>err = ' + err,
+          html: '發送失敗' + '<br/>' + err,
           type: 'error',
           showCloseButton: true,
           confirmButtonText: '確定'
@@ -263,16 +254,6 @@ async function upload() {
         console.log("https://ipfs.io/ipfs/" + directoryHash);
 
         let directoryHTML = "https://ipfs.io/ipfs/" + directoryHash;
-
-        //{ "fromAddress":"0x3407e8c5e9e47a166631393d6711aa580cf17d3b","toAddress":"0x6dee7ac37ba930f97fa66e57e4b4788bd2f52524","message":"https://ipfs.io/ipfs/QmQxz5RJkjsECBNzpGG8TZZc75oTPxqvJk2CerxjhneWYZ"}
-
-        // let result = {"fromAddress":$('#form_sender').value , 
-        // "toAddress":$('#form_receiver').value ,
-        // "message" : directoryHTML};
-
-        // console.log(`result = ${JSON.stringify(result)}`);
-
-
 
         swal({
           html: '發送完成' + '<br/><a target="_blank" href=' + directoryHTML + '>請點我</a>',
@@ -374,8 +355,8 @@ const streamFiles = (ipfs, directory, files, cb) => {
       console.log(`selectedReceiveAddressIndex = ${selectedReceiveAddressIndex}`);
 
 
-      let sendStorage = localStorage.getItem('sendAddress');
-      let receiveStorage = localStorage.getItem('receiveAddress');
+      let sendStorage = sessionStorage.getItem('sendAddress');
+      let receiveStorage = sessionStorage.getItem('receiveAddress');
 
       let sendAddress = JSON.parse(sendStorage);
 
@@ -395,13 +376,21 @@ const streamFiles = (ipfs, directory, files, cb) => {
       // };
 
       // console.log(`data123 = ${JSON.stringify(data123)}`);
+      //{"error":"This address is not in your wallet.Please import your mnenomic word to create address."}
 
-      let result = await doTx({
-        "fromAddress": sendAddress[selectedFromAddressIndex][sendAddressKey],
-        "toAddress": receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
-        "message": "https://ipfs.io/ipfs/" + data.hash
-      });
-      cb(null, data.hash)
+      try {
+        let result = await doTx({
+          "fromAddress": sendAddress[selectedFromAddressIndex][sendAddressKey],
+          "toAddress": receiveAddress[selectedReceiveAddressIndex][receiveAddressKey],
+          "message": "https://ipfs.io/ipfs/" + data.hash
+        });
+        cb(null, data.hash);
+      } catch (error) {
+        cb(error, null);
+      }
+
+
+
     }
   })
   // Add the files one by one
@@ -412,7 +401,7 @@ const streamFiles = (ipfs, directory, files, cb) => {
 }
 
 const initReceiveFunction = async () => {
-  let result = localStorage.getItem('receiveAddress');
+  let result = sessionStorage.getItem('receiveAddress');
   let receiveAddress = JSON.parse(result);
 
   var options = [], _options;
@@ -426,21 +415,36 @@ const initReceiveFunction = async () => {
     options.push(option);
   }
 
-  _options = options.join('');
+  try {
+    let chartsResult = await getCharts(address_array);
 
-  let dropdown = $('#number-multiple')[0];
-  dropdown.innerHTML = _options;
-  $(".selectpicker").selectpicker('refresh');//important
+    drawChart(receiveAddress , chartsResult);
+    console.log(chartsResult);
 
-  console.log(`dropdown = ${dropdown.innerHTML}`);
+    _options = options.join('');
 
-  $("#number-multiple").on("changed.bs.select",
-    async function () {
-      selected_address = address_array[$('#number-multiple').selectpicker('val')];
-      console.log(`selected_address = ${selected_address}`);
-      let result = await getTx(selected_address);
-      console.log(`result = ${JSON.stringify(result)}`);
-    });
+    let dropdown = $('#number-multiple')[0];
+    dropdown.innerHTML = _options;
+    $(".selectpicker").selectpicker('refresh');//important
+
+    console.log(`dropdown = ${dropdown.innerHTML}`);
+
+    $("#number-multiple").on("changed.bs.select",
+      async function () {
+        selected_address = address_array[$('#number-multiple').selectpicker('val')];
+        console.log(`selected_address = ${selected_address}`);
+        // let result = await getTx(selected_address);
+        console.log(`result = ${JSON.stringify(chartsResult[selected_address])}`);
+
+
+      });
+
+
+
+  } catch (error) {
+    showError(error);
+  }
+
 }
 
 const getAddresss = async (count) => {
@@ -451,22 +455,12 @@ const getAddresss = async (count) => {
       'Accept': 'application/json'
     }
   });
-  let fallingResult = null, finalResult = null;
-  if (response.status == 200 || response.status == 201) {
-    finalResult = response;
+  let result = await response.json();
+  if (result.hasOwnProperty('error')) {
+    throw result.error;
   } else {
-    fallingResult = response;
+    return result;
   }
-  if (finalResult !== null) {
-    let data = await finalResult.json();
-
-
-    return data;
-  } else {
-    let err = await fallingResult.json();
-    throw err;
-  }
-
 }
 
 const getTx = async (address) => {
@@ -488,20 +482,11 @@ const getTx = async (address) => {
     }
   });
   swal.close();
-  let fallingResult = null, finalResult = null;
-  if (response.status == 200 || response.status == 201) {
-    finalResult = response;
+  let result = await response.json();
+  if (result.hasOwnProperty('error')) {
+    throw result.error;
   } else {
-    fallingResult = response;
-  }
-  if (finalResult !== null) {
-    let data = await finalResult.json();
-    console.log(`getTx data  = ${JSON.stringify(data)}`);
-
-    return data;
-  } else {
-    let err = await fallingResult.json();
-    throw err;
+    return result;
   }
 }
 
@@ -520,27 +505,86 @@ const doTx = async (data) => {
     },
     body: JSON.stringify(data)
   });
-  let fallingResult = null, finalResult = null;
-  if (response.status == 200 || response.status == 201) {
-    finalResult = response;
+  let result = await response.json();
+  if (result.hasOwnProperty('error')) {
+    throw result.error;
   } else {
-    fallingResult = response;
-  }
-  console.log(`doTx finalResult  = ${finalResult}`);
-  if (finalResult !== null) {
-    let data = await finalResult.json();
-    console.log(`doTx data  = ${JSON.stringify(data)}`);
-
-    return data;
-  } else {
-    let err = await fallingResult.json();
-    throw err;
+    return result;
   }
 }
 
+const getCharts = async (address) => {
 
+  swal({
+    title: '下載中',
+    onOpen: function () {
+      swal.showLoading();
+    }
+  });
 
+  let addressParameter = '';
+  for (let i = 0; i < address.length; i++) {
+    if (i == 0) {
+      addressParameter = address[i];
+    } else {
+      addressParameter = addressParameter + ',' + address[i];
+    }
+  }
 
+  console.log(`addressParameter = ${addressParameter}`);
+  console.log("getCharts url " + "http://localhost:3000/charts?addresses=" + addressParameter);
+  let response = await fetch("http://localhost:3000/charts?addresses=" + addressParameter, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
+      'Accept': 'application/json'
+    }
+  });
+  swal.close();
+  let result = await response.json();
+  if (result.hasOwnProperty('error')) {
+    throw result.error;
+  } else {
+    return result;
+  }
+}
 
+const showError = (error) => {
+  swal({
+    html: '錯誤' + '<br/> = ' + error,
+    type: 'error',
+    showCloseButton: true,
+    confirmButtonText: '確定'
+  });
+}
 
+const drawChart = (receiveAddress , chartsResult) => {
 
+  let addrKeyArray = [];
+  let countArray = [];
+  for (let [index, addr] of receiveAddress.entries()) {
+    let key = Object.keys(addr);
+    addrKeyArray.push(key[0]);
+    countArray.push(chartsResult[index].length);
+  }
+  new Chart(document.getElementById("bar-chart"), {
+    type: 'bar',
+    data: {
+      labels: addrKeyArray,
+      datasets: [
+        {
+          label: "單位（筆）",
+          backgroundColor: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"],
+          data: countArray
+        }
+      ]
+    },
+    options: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: '統計圖'
+      }
+    }
+  });
+}
