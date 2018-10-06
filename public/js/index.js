@@ -99,7 +99,7 @@ const initFunction = async () => {
 };
 
 const changeTab = (tab) => {
-  if (tab === "Send Mail") {
+  if (tab === "Send") {
     console.log(`activeTab1 = ${tab}`);
   } else {
     console.log(`activeTab2 = ${tab}`);
