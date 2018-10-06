@@ -418,7 +418,7 @@ const initReceiveFunction = async () => {
   try {
     let chartsResult = await getCharts(address_array);
 
-    drawChart(receiveAddress , chartsResult);
+    drawChart(receiveAddress, chartsResult);
     console.log(chartsResult);
 
     _options = options.join('');
@@ -558,7 +558,7 @@ const showError = (error) => {
   });
 }
 
-const drawChart = (receiveAddress , chartsResult) => {
+const drawChart = (receiveAddress, chartsResult) => {
 
   let addrKeyArray = [];
   let countArray = [];
@@ -573,7 +573,7 @@ const drawChart = (receiveAddress , chartsResult) => {
       labels: addrKeyArray,
       datasets: [
         {
-          label: "單位（筆）",
+          label: "筆數",
           backgroundColor: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"],
           data: countArray
         }
@@ -584,6 +584,18 @@ const drawChart = (receiveAddress , chartsResult) => {
       title: {
         display: true,
         text: '統計圖'
+      },
+      scales: {
+        yAxes: [{
+          display: true,
+          ticks: {
+            max: 5,
+            suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
+            // OR //
+            beginAtZero: true,   // minimum value will be 0.
+            stepSize: 1
+          }
+        }]
       }
     }
   });
