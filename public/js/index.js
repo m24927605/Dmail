@@ -615,7 +615,7 @@ const insertTable = (data) => {
     let row = table.insertRow(i);
     let cell = row.insertCell(0);
     cell.innerHTML = '<div style="padding:10px;">dateTime: ' + data[i].dateTime + '</br>' +
-      'message: <a href=' + data[i].message + ' target="_blank">' + data[i].message + '</a></div>';
+      'content: <a href=' + data[i].message + ' target="_blank">' + data[i].message + '</a></div>';
   }
 }
 
