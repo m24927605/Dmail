@@ -38,13 +38,18 @@ const initFunction = async () => {
   if (!sendStorage || !receiveStorage) {
     console.log('sendStorage is null || receiveStorage is null');
     try {
-      let result = await getAddresss(20);
+      let result = await getAddresss(21);
       let address = result.newAddressArray;
       let placeNames = ['警察局', '衛生局', '交通局', '環保局', '消防局'];
       console.log(`address.length = ${address.length}`);
       for (let i = 10; i < address.length; i++) {
-        if (i < 15) {
-          let name = `本站${i - 10 + 1}`;
+        let name;
+        if (i < 15 || i == 20) {
+          if(i == 20){
+             name = `獨立記者`;
+          }else{
+             name = `本站${i - 10 + 1}`;
+          }
           let obj = {};
           obj[name] = address[i];
           sendAddress.push(obj);
