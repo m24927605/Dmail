@@ -420,6 +420,8 @@ const initReceiveFunction = async () => {
     options.push(option);
   }
 
+  deleteTable();
+
   try {
     let chartsResult = await getCharts(address_array);
 
@@ -603,14 +605,18 @@ const drawChart = (receiveAddress, chartsResult) => {
 }
 
 const insertTable = (data) => {
-  let rowCount = table.rows.length;
-  for (var i = 0; i < rowCount; i++) {
-    table.deleteRow(0);
-  }
+  deleteTable();
   for (let i = 0; i < data.length; i++) {
     let row = table.insertRow(i);
     let cell = row.insertCell(0);
     cell.innerHTML = '<div style="padding:10px;">dateTime: ' + data[i].dateTime + '</br>' +
       'message: <a href=' + data[i].message + ' target="_blank">' + data[i].message + '</a></div>';
+  }
+}
+
+const deleteTable = ()=>{
+  let rowCount = table.rows.length;
+  for (var i = 0; i < rowCount; i++) {
+    table.deleteRow(0);
   }
 }
