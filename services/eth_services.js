@@ -24,8 +24,9 @@ exports.createAddress = (addressCount) => {
         const endIndex = totalAddressArray.length;
         const newAddressArray = totalAddressArray.slice(startIndex, endIndex);
         resolve(newAddressArray);
-      } else {
-        wallet.generateAddresses(wantCount);
+      }
+      else {
+        //wallet.generateAddresses(wantCount);
         totalAddressArray = wallet.getAddresses();
         const startIndex = baseAddressCount;
         const endIndex = totalAddressArray.length;
