@@ -16,7 +16,7 @@
 
 	<script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.2/umd/popper.min.js"></script>
-  
+
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.bundle.min.js"></script>
 	<script src="/bootstrap/dist/js/bootstrap-select.js"></script>
@@ -28,7 +28,7 @@
 
 	<!-- <script src="/jquery/dist/jquery.min.js"></script> -->
 	<!-- <link href='https://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'> -->
-	<title>Zen Mail</title>
+	<title>Ant City</title>
 </head>
 
 <body>
@@ -37,7 +37,7 @@
 		<!-- main page start -->
 		<div class="row">
 			<!-- rwd start -->
-			<div class="col-xl-8 offset-xl-2 py-5">
+			<div class="col-xl-8 offset-xl-2 py-4">
 				<!-- nav tabs -->
 				<ul class="nav nav-tabs" role="tablist">
 					<li class="nav-item">
@@ -84,7 +84,7 @@
 								<div class="row">
 									<!-- File field -->
 									<div class="col-md-6">
-										<div class="form-Ｆgroup">
+										<div class="form-group">
 											<label for="form_file" class="color_black">File Attach</label>
 											<input id="form_file" type="file" name="email" class="form-control" placeholder="Attach your File" multiple accept="image/*,.pdf,.mp4,.txt,.zip,.json"
 											 draggable="true">
@@ -124,23 +124,27 @@
 							<div class="row">
 								<!-- dropdown field -->
 								<div class="col-md-12">
-									<select class="selectpicker form-control" id="number-multiple" data-container="body" data-live-search="true" title="Please choose"
-									 data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
+									<div class="form-group">
+										<select class="selectpicker form-control my-2" id="number-multiple" data-container="body" data-live-search="true" title="Please choose"
+										 data-hide-disabled="true" data-actions-box="true" data-virtual-scroll="true"></select>
+									</div>
 								</div>
 							</div>
 							<div class="row">
 								<!-- chart field -->
 								<div class="col-md-12">
+										<div class="form-group">
 									<canvas id="bar-chart"></canvas>
+									</div>
 								</div>
 							</div>
 
 							<div class="row">
-									<!-- chart field -->
-									<div class="col-md-12">
-											<table id="table" class="table-striped" border="solid 1px black">
-									</div>
+								<!-- chart field -->
+								<div class="col-md-12">
+									<table id="table" class="table-striped" border="solid 1px black">
 								</div>
+							</div>
 						</div>
 						<!-- second tab end -->
 					</div>
