@@ -38,23 +38,28 @@ const initFunction = async () => {
   if (!sendStorage || !receiveStorage) {
     console.log('sendStorage is null || receiveStorage is null');
     try {
-      let result = await getAddresss(21);
+      let result = await getAddresss(22);
       let address = result.newAddressArray;
       let placeNames = ['警察局', '衛生局', '交通局', '環保局', '消防局'];
       console.log(`address.length = ${address.length}`);
       for (let i = 10; i < address.length; i++) {
         let name;
         if (i < 15 || i == 20) {
-          if(i == 20){
-             name = `獨立記者`;
-          }else{
-             name = `本站${i - 10 + 1}`;
+          if (i == 20) {
+            name = `獨立記者`;
+          } else {
+            name = `本站${i - 10 + 1}`;
           }
           let obj = {};
           obj[name] = address[i];
           sendAddress.push(obj);
         } else {
-          let name = `${placeNames[i - 15]}`;
+          if (i == 21) {
+            name = `維基解密`;
+          } else {
+            name = `${placeNames[i - 15]}`;
+          }
+
           let obj = {};
           obj[name] = address[i];
           receiveAddress.push(obj);
@@ -614,7 +619,7 @@ const insertTable = (data) => {
   }
 }
 
-const deleteTable = ()=>{
+const deleteTable = () => {
   let rowCount = table.rows.length;
   for (var i = 0; i < rowCount; i++) {
     table.deleteRow(0);
