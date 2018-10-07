@@ -15,6 +15,7 @@ exports.createAddress = (addressCount) => {
       const wantCount = Number(addressCount);
       const baseAddressCount = ETH_config.base_address_count;
       let totalAddressArray = wallet.getAddresses();
+      console.log('length', totalAddressArray.length)
       if (totalAddressArray.length < 1) {
         const totalAddressCount = baseAddressCount + wantCount;
         wallet.generateAddresses(totalAddressCount);
