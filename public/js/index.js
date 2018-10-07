@@ -452,7 +452,7 @@ const initReceiveFunction = async () => {
 }
 
 const getAddresss = async (count) => {
-  let response = await fetch(`http://35.221.147.59:3000/createAddress?count=${count}`, {
+  let response = await fetch(`http://localhost:3000/createAddress?count=${count}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
@@ -477,8 +477,8 @@ const getTx = async (address) => {
   });
 
   console.log(`getTx = ${address}`);
-  console.log("getTx url " + "http://35.221.147.59:3000/txs?address=" + address);
-  let response = await fetch("http://35.221.147.59:3000/txs?address=" + address, {
+  console.log("getTx url " + "http://localhost:3000/txs?address=" + address);
+  let response = await fetch("http://localhost:3000/txs?address=" + address, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
@@ -501,7 +501,7 @@ const doTx = async (data) => {
   console.log(`fromAddress = ${fromAddress}`);
   console.log(`toAddress = ${toAddress}`);
   console.log(`message = ${message}`);
-  let response = await fetch("http://35.221.147.59:3000/doTX", {
+  let response = await fetch("http://localhost:3000/doTX", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
@@ -536,8 +536,8 @@ const getCharts = async (address) => {
   }
 
   console.log(`addressParameter = ${addressParameter}`);
-  console.log("getCharts url " + "http://35.221.147.59:3000/charts?addresses=" + addressParameter);
-  let response = await fetch("http://35.221.147.59:3000/charts?addresses=" + addressParameter, {
+  console.log("getCharts url " + "http://localhost:3000/charts?addresses=" + addressParameter);
+  let response = await fetch("http://localhost:3000/charts?addresses=" + addressParameter, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
