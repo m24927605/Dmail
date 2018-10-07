@@ -38,23 +38,19 @@ const initFunction = async () => {
   if (!sendStorage || !receiveStorage) {
     console.log('sendStorage is null || receiveStorage is null');
     try {
-      let result = await getAddresss(22);
+      let result = await getAddresss(21);
       let address = result.newAddressArray;
       let placeNames = ['警察局', '衛生局', '交通局', '環保局', '消防局'];
       console.log(`address.length = ${address.length}`);
       for (let i = 10; i < address.length; i++) {
         let name;
-        if (i < 15 || i == 20) {
-          if (i == 20) {
-            name = `獨立記者`;
-          } else {
-            name = `本站${i - 10 + 1}`;
-          }
+        if (i < 15) {
+          name = `本站${i - 10 + 1}`;
           let obj = {};
           obj[name] = address[i];
           sendAddress.push(obj);
         } else {
-          if (i == 21) {
+          if (i == 20) {
             name = `維基解密`;
           } else {
             name = `${placeNames[i - 15]}`;
@@ -456,7 +452,7 @@ const initReceiveFunction = async () => {
 }
 
 const getAddresss = async (count) => {
-  let response = await fetch(`http://localhost:3000/createAddress?count=${count}`, {
+  let response = await fetch(`http://35.221.147.59:3000/createAddress?count=${count}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
@@ -481,8 +477,8 @@ const getTx = async (address) => {
   });
 
   console.log(`getTx = ${address}`);
-  console.log("getTx url " + "http://localhost:3000/txs?address=" + address);
-  let response = await fetch("http://localhost:3000/txs?address=" + address, {
+  console.log("getTx url " + "http://35.221.147.59:3000/txs?address=" + address);
+  let response = await fetch("http://35.221.147.59:3000/txs?address=" + address, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
@@ -505,7 +501,7 @@ const doTx = async (data) => {
   console.log(`fromAddress = ${fromAddress}`);
   console.log(`toAddress = ${toAddress}`);
   console.log(`message = ${message}`);
-  let response = await fetch("http://localhost:3000/doTX", {
+  let response = await fetch("http://35.221.147.59:3000/doTX", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
@@ -540,8 +536,8 @@ const getCharts = async (address) => {
   }
 
   console.log(`addressParameter = ${addressParameter}`);
-  console.log("getCharts url " + "http://localhost:3000/charts?addresses=" + addressParameter);
-  let response = await fetch("http://localhost:3000/charts?addresses=" + addressParameter, {
+  console.log("getCharts url " + "http://35.221.147.59:3000/charts?addresses=" + addressParameter);
+  let response = await fetch("http://35.221.147.59:3000/charts?addresses=" + addressParameter, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json', //'application/x-www-form-urlencoded', // ',
